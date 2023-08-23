@@ -11,13 +11,19 @@ jobs:
       contents: read
     steps:
       - uses: actions/checkout@master
-      - name: Run Dependency Check
-        run: |
-          wget https://github.com/jeremylong/DependencyCheck/releases/download/v8.3.1/dependency-check-8.3.1-release.zip
-          unzip dependency-check-8.3.1-release.zip
-          ./dependency-check/bin/dependency-check.sh --project "My Project" --scan ./ --out . --format "SARIF"
-
-      - name: Upload SARIF file
-        uses: github/codeql-action/upload-sarif@v2
+      - name: Depcheck
+        uses: dependency-check/Dependency-Check_Action@main
+        id: Depcheck
         with:
-          sarif_file: ./dependency-check-sarif.json
+          project: 'test'
+          path: '.'
+          format: 'HTML'
+          out: 'reports' # this is the default, no need to specify unless you wish to override it
+          args: >
+            --failOnCVSS 7
+            --enableRetired
+      - name: Upload Test results
+        uses: actions/upload-artifact@master
+        with:
+           name: Depcheck report
+           path: ${{github.workspace}}/reports
